@@ -1,27 +1,25 @@
 import React, { useState } from "react";
 
-export default function Authenticate() {
-  const [token, setToken] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
+export default function Authenticate({ token }) {
+  const [successMessage, setSuccessMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [userData, setUserData] = useState(null);
 
-  async function handleAuthentication(event) {
-    event.preventDefault();
-
+  async function handleClick() {
     try {
       const response = await fetch("https://fsa-jwt-practice.herokuapp.com/authenticate", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
       const result = await response.json();
-      console.log(result);
 
       if (result.success) {
-        setAuthenticated(true);
+        setSuccessMessage(result.message);
+        setUserData(result.data);
       } else {
         setError(result.message);
       }
@@ -31,23 +29,12 @@ export default function Authenticate() {
   }
 
   return (
-    <>
+    <div>
       <h2>Authenticate</h2>
+      {successMessage && <p>{successMessage}</p>}
+      {userData && <p>Welcome, {userData.username}!</p>}
       {error && <p>{error}</p>}
-      {authenticated ? (
-        <p>You are authenticated!</p>
-      ) : (
-        <form onSubmit={handleAuthentication}>
-          <label>
-            Token:
-            <input
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-            />
-          </label>
-          <button type="submit">Authenticate</button>
-        </form>
-      )}
-    </>
+      <button onClick={handleClick}>Authenticate Token!</button>
+    </div>
   );
 }
